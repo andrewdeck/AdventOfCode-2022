@@ -20,12 +20,42 @@ const playerLookup = {
   Z: 'S'
 };
 
+// const games = inputText.split('\n').map(line => {
+//   let [opponent, player] = line.split(' ');
+//   // normalize the data
+//   return {
+//     opponent: opponentLookup[opponent],
+//     player: playerLookup[player],
+//   }
+// });
+
+const winLookup = {
+  R: 'P',
+  P: 'S',
+  S: 'R',
+};
+const lossLookup = {
+  R: 'S',
+  P: 'R',
+  S: 'P',
+};
+
+// X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win.
+const recommendedPlay = (opponent, outcome) => {
+  let play = null;
+  if(outcome === 'Y') play = opponent;
+  else if(outcome === 'Z') play = winLookup[opponent];
+  else if(outcome === 'X') play = lossLookup[opponent];
+  return play;
+};
+
+// part 2, player input is result
 const games = inputText.split('\n').map(line => {
   let [opponent, player] = line.split(' ');
   // normalize the data
   return {
     opponent: opponentLookup[opponent],
-    player: playerLookup[player],
+    player: recommendedPlay(opponentLookup[opponent], player),
   }
 });
 
