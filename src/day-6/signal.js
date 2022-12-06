@@ -6,17 +6,17 @@ const inputText = fs.readFileSync('./input.txt', 'utf-8');
 // nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg: first marker after character 10
 // zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw: first marker after character 11
 
-function charsBeforeMarker(string) {
+function charsBeforeMarker(string, sizeOfMarker) {
   let index = 0;
 
   for(let i = 0; i<string.length; i++) {
-    let set = new Set([...string.substr(i,4)]);
-    if(set.size === 4) {
-      index = i + 4;
+    let set = new Set([...string.substr(i,sizeOfMarker)]);
+    if(set.size === sizeOfMarker) {
+      index = i + sizeOfMarker;
       break;
     }
   }
   return index;
 }
 
-console.log(charsBeforeMarker(inputText));
+console.log(charsBeforeMarker(inputText, 14));
