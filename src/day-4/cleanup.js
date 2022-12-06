@@ -21,6 +21,10 @@ class ElfPair {
     }
   }
 
+  toString() {
+    return `${this.leftElf.start}-${this.leftElf.end},${this.rightElf.start}-${this.rightElf.end}`;
+  } 
+
   get overlap() {
     let hasOverlap = false;
     if(this.leftElf.start <= this.rightElf.start && this.leftElf.end >= this.rightElf.end ) hasOverlap = true;
@@ -28,8 +32,17 @@ class ElfPair {
     // if(hasOverlap) console.log(this.leftElf, this.rightElf);
     return hasOverlap;
   }
+
+  get partialOverlap() {
+    let hasOverlap = false;
+    if(this.leftElf.start <= this.rightElf.start && this.leftElf.end >= this.rightElf.start) hasOverlap = true;
+    else if(this.rightElf.start <= this.leftElf.start && this.rightElf.end >= this.leftElf.start) hasOverlap = true;
+    
+    return hasOverlap;
+  }
 }
 
 const pairs = inputText.split('\n').map( row => new ElfPair(row));
 
 console.log(pairs.filter(x => x.overlap).length);
+console.log(pairs.filter(x => x.partialOverlap).length);
