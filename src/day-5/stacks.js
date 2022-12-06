@@ -43,7 +43,7 @@ class Ship {
   handleInstruction(instruction) {
     let [, count,, start,, end] = instruction.split(' ').map(Number);
     let crates = this.stacks[start - 1].splice(-1 * count);
-    this.stacks[end - 1].push(...crates.reverse());
+    this.stacks[end - 1].push(...crates);
   }
 
   topCrates() {
