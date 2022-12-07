@@ -1,29 +1,29 @@
 import fs from 'fs';
 
-// const inputText = fs.readFileSync('./input.txt', 'utf-8');
-const inputText = `$ cd /
-$ ls
-dir a
-14848514 b.txt
-8504156 c.dat
-dir d
-$ cd a
-$ ls
-dir e
-29116 f
-2557 g
-62596 h.lst
-$ cd e
-$ ls
-584 i
-$ cd ..
-$ cd ..
-$ cd d
-$ ls
-4060174 j
-8033020 d.log
-5626152 d.ext
-7214296 k`;
+const inputText = fs.readFileSync('./input.txt', 'utf-8');
+// const inputText = `$ cd /
+// $ ls
+// dir a
+// 14848514 b.txt
+// 8504156 c.dat
+// dir d
+// $ cd a
+// $ ls
+// dir e
+// 29116 f
+// 2557 g
+// 62596 h.lst
+// $ cd e
+// $ ls
+// 584 i
+// $ cd ..
+// $ cd ..
+// $ cd d
+// $ ls
+// 4060174 j
+// 8033020 d.log
+// 5626152 d.ext
+// 7214296 k`;
 
 const MAX_DIR_SIZE = 100000;
 
@@ -38,38 +38,31 @@ class Directory {
   constructor(name, parentDirectory) {
     this.name = name;
     this.parentDirectory = parentDirectory;
-    this.subDirs = [];
-    this.files = [];
-    this._size = null;
+    this.items = [];
   }
 
   get size() {
-    if(this._size) return this._size;
-    let fileSize = this.files.reduce((sum, f) => sum + f.size, 0);
-    let subDirSize = this.subDirs.reduce((sum, dir) => sum + dir.size, 0);
-    this._size = fileSize + subDirSize;
-    return this._size;
+    return this.items.reduce((sum, x) => sum + x.size, 0);
   }
 
   print() {
-    let depth = 0;
+    let indent = '';
     let ref = this.parentDirectory;
     while(ref) {
-      depth++;
+      indent += '  ';
       ref = ref.parentDirectory;
     }
-    let indent = '';
-    for(let i =0; i<depth; i++) indent += '  ';
-    // console.log(`${indent}${this.name}/ size=${this.size}`);
     console.log(`${indent}${this.name}/`);
-    this.subDirs.forEach(dir => dir.print());
-    this.files.forEach(file => { console.log(`${indent}  ${file.name} size=${file.size}`)});
+    this.items.forEach(item => {
+      if(item.print) item.print();
+      else console.log(`${indent}  ${item.name} size=${item.size}`)
+    })
   }
 }
 
-const directories = {};
+const directories = [];
 const root = new Directory('/');
-directories['/'] = root;
+directories.push(root);
 
 const commandChunks = inputText.split('\n').reduce((chunks, row) => {
   if(row.charAt(0) === '$') chunks.push([row]);
@@ -84,26 +77,28 @@ commandChunks.forEach( chunk => {
   if(cmd === 'cd') {
     if(arg === '/') currentDirectory = root;
     else if(arg === '..') currentDirectory = currentDirectory.parentDirectory;
-    else currentDirectory = currentDirectory.subDirs.find( x => x.name === arg);
+    else currentDirectory = currentDirectory.items.find( x => x.name === arg);
   } else { // ls
     let list = chunk.slice(1);
     list.forEach(item => {
       let [sizeOrType, name] = item.split(' ');
       if(sizeOrType === 'dir') {
         let newDir = new Directory(name, currentDirectory);
-        directories[name] = newDir;
-        currentDirectory.subDirs.push(newDir);
-      } else currentDirectory.files.push(new File(name, Number(sizeOrType)));
+        directories.push(newDir);
+        currentDirectory.items.push(newDir);
+      } else currentDirectory.items.push(new File(name, Number(sizeOrType)));
     })
   }
 });
 
 let sumBelowThreshold = 0;
 
-Object.entries(directories).forEach(([name, directory]) => {
-  if(directory.size <= MAX_DIR_SIZE) sumBelowThreshold += directory.size;
+directories.forEach(directory => {
+  if(directory.size <= MAX_DIR_SIZE) {
+    sumBelowThreshold += directory.size;
+  }
 });
 
 console.log(sumBelowThreshold);
 
-root.print();
+// root.print();
