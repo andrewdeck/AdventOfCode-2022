@@ -26,6 +26,8 @@ const inputText = fs.readFileSync('./input.txt', 'utf-8');
 // 7214296 k`;
 
 const MAX_DIR_SIZE = 100000;
+const DISK_SIZE = 70000000;
+const REQUIRED_SPACE = 30000000;
 
 class File {
   constructor(name, size) {
@@ -91,14 +93,26 @@ commandChunks.forEach( chunk => {
   }
 });
 
-let sumBelowThreshold = 0;
+// let sumBelowThreshold = 0;
 
-directories.forEach(directory => {
-  if(directory.size <= MAX_DIR_SIZE) {
-    sumBelowThreshold += directory.size;
-  }
-});
+// directories.forEach(directory => {
+//   if(directory.size <= MAX_DIR_SIZE) {
+//     sumBelowThreshold += directory.size;
+//   }
+// });
 
-console.log(sumBelowThreshold);
+// console.log(sumBelowThreshold);
 
 // root.print();
+
+let currentFreeSpace = DISK_SIZE - root.size;
+let neededFreeSpace = REQUIRED_SPACE - currentFreeSpace;
+
+directories.sort((a,b) => a.size - b.size);
+for(let i = 0; i < directories.length; i++) {
+  let dir = directories[i];
+  if(dir.size >= neededFreeSpace) {
+    console.log(dir.size);
+    break;
+  }
+}
