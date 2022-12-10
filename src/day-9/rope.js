@@ -1,15 +1,14 @@
-import { debug } from 'console';
 import fs from 'fs';
 
-// const inputText = fs.readFileSync('./input.txt', 'utf-8');
-const inputText = `R 5
-U 8
-L 8
-D 3
-R 17
-D 10
-L 25
-U 20`;
+const inputText = fs.readFileSync('./input.txt', 'utf-8');
+// const inputText = `R 5
+// U 8
+// L 8
+// D 3
+// R 17
+// D 10
+// L 25
+// U 20`;
 
 const posKey = ({x, y}) => `${x},${y}`;
 
@@ -19,13 +18,13 @@ const knots = [...Array(NUM_KNOTS)].map(() => { return {x: 0, y: 0} });
 
 let tailLocations = new Set();
 
-let max = {x: 0, y: 0},
-    min = {x: 0, y: 0};
+let max = {x: 5, y: 5},
+    min = {x: -5, y: -5};
 
 inputText.split('\n').forEach(row => {
   let [direction, distance] = row.split(' ');
   moveHead(direction, Number(distance));
-  debug();
+  // debug(row);
 });
 
 function moveHead(direction, distance) {
@@ -65,7 +64,10 @@ function moveTrailingKnot(front, back) {
   let xDiff = front.x - back.x,
       yDiff = front.y - back.y;
   
-  if(Math.abs(xDiff) === 2) {
+  if(Math.abs(xDiff) === 2 && Math.abs(yDiff) === 2) {
+    back.x = front.x - (xDiff / 2);
+    back.y = front.y - (yDiff / 2);
+  } else if(Math.abs(xDiff) === 2) {
     back.x = front.x - (xDiff / 2);
     back.y = front.y;
   } else {
@@ -74,8 +76,19 @@ function moveTrailingKnot(front, back) {
   }
 }
 
-function debug() {
-  
+function debug(instruction) {
+  console.log();
+  console.log(instruction);
+  // console.log(knots);
+
+  for(let y = max.y; y >= min.y; y--) {
+    let row = ``;
+    for(let x = min.x; x <= max.x; x++) {
+      let index = knots.findIndex(k => k.x === x && k.y === y);
+      row += index === -1 ? '.' : index;
+    }
+    console.log(row);
+  }
 }
 
 console.log(tailLocations.size);
