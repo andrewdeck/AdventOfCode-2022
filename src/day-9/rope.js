@@ -1,29 +1,35 @@
+import { debug } from 'console';
 import fs from 'fs';
 
-const inputText = fs.readFileSync('./input.txt', 'utf-8');
-// const inputText = `R 4
-// U 4
-// L 3
-// D 1
-// R 4
-// D 1
-// L 5
-// R 2`;
+// const inputText = fs.readFileSync('./input.txt', 'utf-8');
+const inputText = `R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20`;
 
 const posKey = ({x, y}) => `${x},${y}`;
 
-let head = { x: 0, y: 0},
-    tail = { x: 0, y: 0};
+const NUM_KNOTS = 10;
+
+const knots = [...Array(NUM_KNOTS)].map(() => { return {x: 0, y: 0} });
 
 let tailLocations = new Set();
-tailLocations.add(posKey(tail));
+
+let max = {x: 0, y: 0},
+    min = {x: 0, y: 0};
 
 inputText.split('\n').forEach(row => {
   let [direction, distance] = row.split(' ');
   moveHead(direction, Number(distance));
+  debug();
 });
 
 function moveHead(direction, distance) {
+  let head = knots[0];
   for(let i = 0; i < distance; i++) {
     if(direction === 'U') {
       head.y++;
@@ -34,30 +40,42 @@ function moveHead(direction, distance) {
     } else if (direction === 'R') {
       head.x++;
     }
+    if(head.x > max.x) max.x = head.x;
+    if(head.y > max.y) max.y = head.y;
+    if(head.x < min.x) min.x = head.x;
+    if(head.y < min.y) min.y = head.y;
 
-    if(!tailIsTouchingHead()) moveTail(direction);
+    for(let j = 1; j < NUM_KNOTS; j++) {
+      let front = knots[j - 1],
+          back = knots[j];
+      if(knotsAreTouching(front, back)) break;
+      else moveTrailingKnot(front, back);
+    }
+    tailLocations.add(posKey(knots[NUM_KNOTS - 1]));
   }
 }
 
-function tailIsTouchingHead() {
-  let xDiff = Math.abs(head.x - tail.x),
-      yDiff = Math.abs(head.y - tail.y);
+function knotsAreTouching(front, back) {
+  let xDiff = Math.abs(front.x - back.x),
+      yDiff = Math.abs(front.y - back.y);
   return xDiff < 2 && yDiff < 2;
 }
 
-function moveTail(direction) {
-  let {x, y} = head;
-  if(direction === 'U') {
-    tail = { x, y: head.y - 1 };
-  } else if (direction === 'D') {
-    tail = { x, y: head.y + 1 };
-  } else if (direction === 'L') {
-    tail = { x: x + 1, y };
-  } else if (direction === 'R') {
-    tail = { x: x - 1, y };
+function moveTrailingKnot(front, back) {
+  let xDiff = front.x - back.x,
+      yDiff = front.y - back.y;
+  
+  if(Math.abs(xDiff) === 2) {
+    back.x = front.x - (xDiff / 2);
+    back.y = front.y;
+  } else {
+    back.x = front.x;
+    back.y = front.y - (yDiff / 2);
   }
+}
 
-  tailLocations.add(posKey(tail));
+function debug() {
+  
 }
 
 console.log(tailLocations.size);
