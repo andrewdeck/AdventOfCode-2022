@@ -85,7 +85,8 @@ function debug(instruction) {
     let row = ``;
     for(let x = min.x; x <= max.x; x++) {
       let index = knots.findIndex(k => k.x === x && k.y === y);
-      row += index === -1 ? '.' : index;
+      if(x === 0 && y === 0) row += index === -1 ? 's' : index;
+      else row += index === -1 ? '.' : index;
     }
     console.log(row);
   }
