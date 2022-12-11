@@ -6,8 +6,9 @@ const inputText = fs.readFileSync('./input.txt', 'utf-8');
 class CPU {
   constructor() {
     this.register = 1;
-    this.cycle = 0;
+    this.cycle = -1;
     this.signalForCycle = [];
+    this.ram = [];
   }
 
   // 20th, 60th, 100th, 140th, 180th, and 220th
@@ -31,8 +32,20 @@ class CPU {
     }
   }
 
+  printScreen() {
+    for(let y = 0; y < 6; y++) {
+      let line = '';
+      for(let x = 0; x < 40; x++) {
+        let spritePos = this.ram[(y * 40) + x];
+        line += Math.abs(spritePos - x) < 2 ? '#' : '.';
+      }
+      console.log(line);
+    }
+  }
+
   storeSignalValue() {
-    this.signalForCycle[this.cycle] = this.cycle * this.register;
+    this.ram[this.cycle] = this.register;
+    this.signalForCycle[this.cycle + 1] = (this.cycle + 1) * this.register;
   }
 }
 
@@ -47,5 +60,16 @@ function calculateSignalStrength(program) {
   return cpu.signalStrength;
 }
 
+function renderScreen(program) {
+  const cpu = new CPU();
+  const instructions = program.split('\n');
 
+  instructions.forEach( int => {
+    cpu.executeInstruction(int);
+  });
+
+  cpu.printScreen();
+}
+
+renderScreen(inputText);
 console.log(calculateSignalStrength(inputText));
