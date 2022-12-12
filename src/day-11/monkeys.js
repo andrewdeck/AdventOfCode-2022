@@ -22,7 +22,7 @@ class Monkey {
     this.items.forEach( item => {
       this.itemsInspected++;
       item = this.operation(item);
-      item = Math.floor(item / 3);
+      item = item % LCM;
       deliveries.push({
         item,
         recipient: this.test(item) ? this.successMonkey : this.failureMonkey
@@ -36,7 +36,7 @@ class Monkey {
 function createTestFunc(testStr) {
   let num = testStr.split(' ').slice(-1)[0];
   num = Number(num);
-  return worry => worry % num === 0;
+  return [worry => worry % num === 0, num];
 }
 
 function createOpFunc(opStr) {
@@ -53,6 +53,7 @@ function createOpFunc(opStr) {
 }
 
 const monkeys = [];
+let LCM = 1;
 
 let blobs = inputText.split('\n\n');
 blobs.forEach( blob => {
@@ -60,15 +61,18 @@ blobs.forEach( blob => {
   const monkeyId = Number(lines[0].replace('Monkey ', '').replace(':',''));
   const items = lines[1].replace('  Starting items: ','').split(', ').map(Number);
   const opFunc = createOpFunc(lines[2]);
-  const testFunc = createTestFunc(lines[3]);
+  const [testFunc, divisor] = createTestFunc(lines[3]);
   const successMonkey = Number(lines[4].split(' ').slice(-1)[0]);
   const failureMonkey = Number(lines[5].split(' ').slice(-1)[0]);
   
   const monkey = new Monkey(items, opFunc, testFunc, successMonkey, failureMonkey);
+  LCM = LCM * divisor;
   monkeys[monkeyId] = monkey;
 });
 
-for(let round = 0; round < 20; round++) {
+const NUM_ROUNDS = 10000;
+
+for(let round = 0; round < NUM_ROUNDS; round++) {
   monkeys.forEach( monkey => {
     let items = monkey.processItems();
     items.forEach(({item, recipient}) => {
@@ -77,5 +81,6 @@ for(let round = 0; round < 20; round++) {
   });
 }
 
+// monkeys.forEach((m, i) => {console.log(`monkey ${i}: ${m.itemsInspected}`)});
 monkeys.sort((a,b) => a.itemsInspected - b.itemsInspected);
 console.log(monkeys.slice(-2).reduce((a, b) => a * b.itemsInspected, 1));
