@@ -12,5 +12,8 @@
   "license": "ISC",
   "devDependencies": {
     "eslint": "^8.28.0"
+  },
+  "dependencies": {
+    "dijkstrajs": "^1.0.2"
   }
 }
