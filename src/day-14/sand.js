@@ -2,7 +2,7 @@ import fs from 'fs';
 
 const inputText = fs.readFileSync('./input.txt', 'utf-8');
 // const inputText = fs.readFileSync('./example.txt', 'utf-8');
-
+console.time('sand.js');
 const ROCK = '#',
       SAND = 'o',
       AIR  = '.';
@@ -118,3 +118,4 @@ while(!plugged) {
 
 printCave();
 console.log(grains);
+console.timeEnd('sand.js');
