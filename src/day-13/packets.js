@@ -6,18 +6,36 @@ const inputText = fs.readFileSync('./input.txt', 'utf-8');
 
 const pairs = inputText.split('\n\n');
 
-let score = 0;
+let allPackets = [
+  [[2]],
+  [[6]]
+];
 
-pairs.forEach((string, index) => {
-  let [left, right] = string.split('\n').map(JSON.parse);
-  debug();
-  debug(`== Pair ${index + 1} ==`);
-  if(isProperlyOrdered(left, right)) {
-    score += (index + 1);
-  }
+pairs.forEach( str => {
+  allPackets.push(...str.split('\n').map(JSON.parse));
 });
 
-console.log(score);
+allPackets.sort((a, b) => isProperlyOrdered(a,b) ? -1 : 1);
+
+let indexes = [];
+allPackets.forEach((packet, index) => {
+  let string = JSON.stringify(packet);
+  if (string === '[[2]]' || string === '[[6]]') indexes.push(index + 1);
+});
+console.log(indexes[0] * indexes[1]);
+
+// let score = 0;
+
+// pairs.forEach((string, index) => {
+//   let [left, right] = string.split('\n').map(JSON.parse);
+//   debug();
+//   debug(`== Pair ${index + 1} ==`);
+//   if(isProperlyOrdered(left, right)) {
+//     score += (index + 1);
+//   }
+// });
+
+// console.log(score);
 
 function isProperlyOrdered(left, right, level = 0) {
   debug(`- Compare ${JSON.stringify(left)} vs ${JSON.stringify(right)}`, level);
@@ -58,7 +76,7 @@ function isProperlyOrdered(left, right, level = 0) {
 function debug(output = '', level = 0) {
   let prefix = '';
   for(let x = 0; x < level; x++) prefix += '  ';
-  console.log(`${prefix}${output}`);
+  // console.log(`${prefix}${output}`);
 }
 
 function typeOf(val) {
