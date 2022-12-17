@@ -1,7 +1,7 @@
 import fs from 'fs';
 
-// const inputText = fs.readFileSync('./input.txt', 'utf-8');
-const inputText = fs.readFileSync('./unit.txt', 'utf-8');
+const inputText = fs.readFileSync('./input.txt', 'utf-8');
+// const inputText = fs.readFileSync('./unit.txt', 'utf-8');
 // const inputText = fs.readFileSync('./example.txt', 'utf-8');
 
 const pairs = inputText.split('\n\n');
@@ -13,7 +13,6 @@ pairs.forEach((string, index) => {
   debug();
   debug(`== Pair ${index + 1} ==`);
   if(isProperlyOrdered(left, right)) {
-    // debug('valid index: ', index + 1);
     score += (index + 1);
   }
 });
@@ -21,33 +20,26 @@ pairs.forEach((string, index) => {
 console.log(score);
 
 function isProperlyOrdered(left, right, level = 0) {
-  if(right.length === 0) {
-    debug(`- Right side ran out of items, so inputs are not in the right order`, level);
-    return false;
-  }
-  if(left.length === 0) {
-    return true;
-    debug(`Left side ran out of items, so inputs are in the right order`);
-  }
   debug(`- Compare ${JSON.stringify(left)} vs ${JSON.stringify(right)}`, level);
 
-  for(let i = 0; i < left.length; i++) {
+  for(let i = 0; i < Math.max(left.length, right.length); i++) {
     let leftItem = left[i],
         rightItem = right[i];
     debug(`  - Compare ${JSON.stringify(leftItem)} vs ${JSON.stringify(rightItem)}`, level);
     const leftType = typeOf(leftItem),
           rightType = typeOf(rightItem);
 
-    if(leftType === 'undefined') console.log('THIS SHOULD BE TRUE');
     if(rightType === 'undefined') {
       debug(`    - Right side ran out of items, so inputs are not in the right order`);
       return false;
+    } else if(leftType === 'undefined') {
+      debug(`- Left side ran out of items, so inputs are in the right order`, level);
+      return true;
     } else if(leftType !== rightType) {
-      // debug('one is a list');
       if(leftType === 'number') leftItem = [leftItem];
       else rightItem = [rightItem];
-      console.log(`Mixed Types ${JSON.stringify(leftItem)} vs ${JSON.stringify(rightItem)} ${rightType}`)
-      if(!isProperlyOrdered(leftItem, rightItem, level + 1)) return false;
+      let sub = isProperlyOrdered(leftItem, rightItem, level + 1);
+      if(sub !== undefined) return sub;
     } else if( leftType === 'number') {
       if(leftItem < rightItem) {
         debug(`    - Left side is smaller, so inputs are in the right order`, level);
@@ -57,10 +49,10 @@ function isProperlyOrdered(left, right, level = 0) {
         return false;
       }
     } else { // both lists
-      if(!isProperlyOrdered(leftItem, rightItem, level + 1)) return false;
+      let sub = isProperlyOrdered(leftItem, rightItem, level + 1);
+      if(sub !== undefined) return sub;
     }
   }
-  return true;
 }
 
 function debug(output = '', level = 0) {
