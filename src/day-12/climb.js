@@ -37,5 +37,29 @@ function generateGraph(grid) {
 
 const graph = generateGraph(grid);
 
-let path = dijkstra.find_path(graph, nodeId(start.x, start.y), nodeId(end.x, end.y));
-console.log(path.length -1); // includes starting point
+// let path = dijkstra.find_path(graph, nodeId(start.x, start.y), nodeId(end.x, end.y));
+// console.log(path.length -1); // includes starting point
+
+let lowestPoints = [];
+const aVal = 'a'.charCodeAt(0);
+for(let y = 0; y < grid.length; y++) {
+  let row = grid[y];
+  for(let x = 0; x < row.length; x++) {
+    if(grid[y][x] === aVal) lowestPoints.push({x,y});
+  }
+}
+
+let minDistance = 472; //part 1
+lowestPoints.forEach(point => {
+  try {
+    let path = dijkstra.find_path(graph, nodeId(point.x, point.y), nodeId(end.x, end.y));
+    if(path.length - 1 < minDistance) {
+      console.log(point);
+      minDistance = path.length - 1;
+    }
+  } catch(e) {
+    // Could not find a path
+  }
+});
+
+console.log(minDistance);
