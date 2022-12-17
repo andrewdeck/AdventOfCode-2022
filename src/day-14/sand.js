@@ -9,22 +9,22 @@ const ROCK = '#',
 
 const rocks = inputText.split('\n').map(line => line.split(' -> ').map(coords => coords.split(',').map(Number)));
 
-let furthestLeft = 500;
+// let furthestLeft = 500;
 let deepestHeight = 0;
 
 rocks.forEach(vectors => {
   vectors.forEach(([x,y]) => {
-    if(x < furthestLeft) furthestLeft = x;
+    // if(x < furthestLeft) furthestLeft = x;
     if(y > deepestHeight) deepestHeight = y;
   })
 });
 
-const offsetRocks = rocks.map(vectors => vectors.map(([x,y]) => [x - furthestLeft, y])); // leave 1 space to the left in coordinates
+// const offsetRocks = rocks.map(vectors => vectors.map(([x,y]) => [x - furthestLeft, y])); // leave 1 space to the left in coordinates
 
-let cave = [...Array(deepestHeight + 2)].map(() => []);
+let cave = [...Array(deepestHeight + 3)].map(() => []);
 
 // fill in rocks
-offsetRocks.forEach(vectors => {
+rocks.forEach(vectors => {
   let previousPoint = vectors[0];
   
   for(let idx = 1; idx < vectors.length; idx++) {
@@ -47,10 +47,17 @@ offsetRocks.forEach(vectors => {
 
 function printCave() {
   let width = cave.reduce((w, row) => Math.max(w, row.length), 0);
+  let leftEdge = width;
+  cave.forEach(row => {
+    row.forEach((val, index) => {
+      if(val && index < leftEdge) leftEdge = index;
+    });
+  })
+  
   for(let y = 0; y < cave.length; y++) {
     let line = '';
-    for(let x = 0; x < width; x++) {
-      line += cave[y][x] ? cave[y][x] : AIR;
+    for(let x = leftEdge; x < width; x++) {
+      line += cave[y][x] ? cave[y][x] : y === deepestHeight + 2 ? ROCK : AIR;
     }
     console.log(line);
   }
@@ -58,29 +65,56 @@ function printCave() {
 
 // let the sand fall
 let grains = 0;
-let fellBelowBottom = false;
-while(!fellBelowBottom) {
-  let grain = [500 - furthestLeft, 0];
+// let fellBelowBottom = false;
+// while(!fellBelowBottom) {
+//   let grain = [500 , 0];
 
-  while(grain[1] < deepestHeight) {
+//   while(grain[1] < deepestHeight) {
+//     let [x,y] = grain;
+//     // 1. down
+//     // 2. down-left
+//     // 3. down-right
+//     if(!cave[y+1][x]) grain = [x, y+1];
+//     else if(!cave[y+1][x-1]) grain = [x-1, y+1];
+//     else if(!cave[y+1][x+1]) grain = [x+1, y+1];
+//     else { // final resting place
+//       cave[y][x] = SAND;
+//       grains++;
+//       break;
+//     }
+//     if(grain[1] >= deepestHeight) {
+//       fellBelowBottom = true;
+//       break;
+//     }
+//   }
+// }
+
+let plugged = false;
+while(!plugged) {
+  let grain = [500,0];
+
+  while(true) {
     let [x,y] = grain;
     // 1. down
     // 2. down-left
     // 3. down-right
-    if(!cave[y+1][x]) grain = [x, y+1];
+    if(y === deepestHeight + 1) {
+      cave[y][x] = SAND;
+      grains++;
+      break;
+    } else if(!cave[y+1][x]) grain = [x, y+1];
     else if(!cave[y+1][x-1]) grain = [x-1, y+1];
     else if(!cave[y+1][x+1]) grain = [x+1, y+1];
     else { // final resting place
       cave[y][x] = SAND;
       grains++;
-      break;
-    }
-    if(grain[1] >= deepestHeight) {
-      fellBelowBottom = true;
+      if(grain[0] === 500 && grain[1] === 0) plugged = true;
       break;
     }
   }
 }
+
+
 
 printCave();
 console.log(grains);
