@@ -1,7 +1,7 @@
 import fs, { link } from 'fs';
 
-// const inputText = fs.readFileSync('./input.txt', 'utf-8');
-const inputText = fs.readFileSync('./example.txt', 'utf-8');
+const inputText = fs.readFileSync('./input.txt', 'utf-8');
+// const inputText = fs.readFileSync('./example.txt', 'utf-8');
 
 const inputArray = inputText.split('\n').map(Number);
 
@@ -51,47 +51,58 @@ class LinkedListNode {
 
 class CircularLinkedList {
   constructor(arrayOfNums) {
-    let nodeMap = new Map();
+    let nodeArray = [];
     const LENGTH = arrayOfNums.length;
 
     // first create unlinked nodes
-    for(const num of arrayOfNums) {
-      let node = new LinkedListNode(num);
-      nodeMap.set(num, node);
-    }
+    arrayOfNums.forEach((num, idx) => {
+      let node = new LinkedListNode(num, idx);
+      nodeArray[idx] = node;
+    });
 
     // link nodes circularly
     arrayOfNums.forEach((num, index) => {
-      let node = nodeMap.get(num);
-      if(!node) console.log(num, index);
+      let node = nodeArray[index];
       if(index === 0) {
-        node.prev = nodeMap.get(arrayOfNums[LENGTH - 1]);
-        node.next = nodeMap.get(arrayOfNums[1]);
+        node.prev = nodeArray[LENGTH - 1];
+        node.next = nodeArray[1];
       } else if(index === LENGTH - 1) {
-        node.prev = nodeMap.get(arrayOfNums[index - 1]);
-        node.next = nodeMap.get(arrayOfNums[0]);
+        node.prev = nodeArray[index - 1];
+        node.next = nodeArray[0];
       } else {
-        node.prev = nodeMap.get(arrayOfNums[index - 1]);
-        node.next = nodeMap.get(arrayOfNums[index + 1]);
+        node.prev = nodeArray[index - 1];
+        node.next = nodeArray[index + 1];
       }
     });
     this.size = arrayOfNums.length;
-    this.firstNode = nodeMap.get(arrayOfNums[0]);
+    this.firstNode = nodeArray[0];
   }
 
-  find(num) {
+  find(index) {
     let failsafe = 0;
     let node = this.firstNode;
-    while(node.value !== num) {
+    while(node.id !== index) {
       failsafe++;
       node = node.next;
-      if(failsafe > 2 * this.size) throw new Error(`the list seems to have broken, cannot find: ${num}`);
+      if(failsafe > 2 * this.size) throw new Error(`the list seems to have broken, cannot find: ${index}`);
     }
     return node;
   }
 
-  move(number) {
-    let node = this.find(number);
+  findZero() {
+    let failsafe = 0;
+    let node = this.firstNode;
+    while(node.value !== 0) {
+      failsafe++;
+      node = node.next;
+      if(failsafe > 2 * this.size) throw new Error(`the list seems to have broken, cannot find: ${index}`);
+    }
+    return node;
+  }
+
+  move(index) {
+    let node = this.find(index);
+    const number = node.value;
     let count = Math.abs(number);
 
     for(let c = 0; c < count; c++) {
@@ -129,7 +140,7 @@ function mixFile() {
 
   inputArray.forEach((number, index) => {
     // console.log(index, number);
-    let node = linkedList.move(number);
+    let node = linkedList.move(index);
     // inputArray.forEach( num => linkedList.find(num));
     // console.log();
     // console.log(`${number} moves between ${node.prev.value} and ${node.next.value}:`)
@@ -138,9 +149,9 @@ function mixFile() {
 }
 
 mixFile();
-linkedList.print();
+// linkedList.print();
 
-let node = linkedList.find(0);
+let node = linkedList.findZero();
 let groveSum = 0;
 for(let pos = 1; pos <= 3000; pos++) {
   node = node.next;
