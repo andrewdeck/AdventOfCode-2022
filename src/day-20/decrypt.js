@@ -1,9 +1,9 @@
-import fs, { link } from 'fs';
+import fs from 'fs';
 
 const inputText = fs.readFileSync('./input.txt', 'utf-8');
 // const inputText = fs.readFileSync('./example.txt', 'utf-8');
 
-const inputArray = inputText.split('\n').map(Number);
+const inputArray = inputText.split('\n').map( x => Number(x) * 811589153);
 
 class LinkedListNode {
   constructor(value, id) {
@@ -105,6 +105,9 @@ class CircularLinkedList {
     const number = node.value;
     let count = Math.abs(number);
 
+    // if moves === size - 1 a full loop occurs, so we can round down
+    count = count % (this.size - 1);
+
     for(let c = 0; c < count; c++) {
       if(number < 0 ) {
         if(node === this.firstNode) this.firstNode = node.prev;
@@ -115,8 +118,6 @@ class CircularLinkedList {
         // console.log('\nnode.moveForward()', c);
         node.moveForward();
       }
-
-      // this.print();
     }
     return node;
   }
@@ -147,9 +148,11 @@ function mixFile() {
     // linkedList.print();
   });
 }
-
-mixFile();
-// linkedList.print();
+for(let x = 0; x < 10; x++) {
+  mixFile();
+  console.log(x);
+  // linkedList.print();
+}
 
 let node = linkedList.findZero();
 let groveSum = 0;
