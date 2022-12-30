@@ -27,39 +27,42 @@ const valves = inputText.split('\n').map(line => {
 
 const valvesWithFlow = valves.filter(v => v.flowRate);
 
-function memoKey(valve, openValves, timeRemaining) {
+function memoKey(valve, openValves, timeRemaining, playersRemaining) {
   let openStr = [...openValves].sort().join(',');
-  return `${valve}::${openStr}::${timeRemaining}`;
+  return `${valve}::${openStr}::${timeRemaining}::${playersRemaining}`;
 }
 
-function findMostFlow(valve, openValves, timeRemaining) {
-  if(timeRemaining === 0) return 0;
+function findMostFlow(valve, openValves, timeRemaining, playersRemaining) {
+  // if(playersRemaining === 0) console.log(`Elephant starting: ${valvesWithFlow.length - openValves.length}`);
+  if(timeRemaining === 0) {
+    if(playersRemaining > 0 && openValves.length !== valvesWithFlow.length) return findMostFlow('AA', [...openValves], 26, playersRemaining - 1);
+    else return 0;
+  }
 
-  const key = memoKey(valve, openValves, timeRemaining);
-  if(stateMemoMap.has(key)) return stateMemoMap.get(key);
-
-  let flow = openValves.reduce((sum, valve) => {
-    return sum + valveMap.get(valve).flowRate;
-  }, 0);
+  const key = memoKey(valve, openValves, timeRemaining, playersRemaining);
+  if(stateMemoMap.has(key)) {
+    // console.log(`cache hit ${key}`);
+    return stateMemoMap.get(key);
+  }
 
   if(openValves.length === valvesWithFlow.length) { // all valves are open
-    return flow * timeRemaining;
+    return 0;
   }
 
   let answer = 0;
-
-  if (!openValves.includes(valve) && valveMap.get(valve).flowRate) { // open current valve
-    answer = findMostFlow(valve, [...openValves, valve], timeRemaining - 1);
+  const {flowRate} = valveMap.get(valve);
+  if (!openValves.includes(valve) && flowRate) { // open current valve
+    answer = ((timeRemaining - 1) * flowRate) + findMostFlow(valve, [...openValves, valve], timeRemaining - 1, playersRemaining);
   } 
 
   valveMap.get(valve).tunnels.forEach(v => {
-    let optVal = findMostFlow(v, [...openValves], timeRemaining - 1);
+    let optVal = findMostFlow(v, [...openValves], timeRemaining - 1, playersRemaining);
     if(optVal > answer) answer = optVal;
   });
 
-  stateMemoMap.set(memoKey(valve, openValves, timeRemaining), answer + flow);
-  return answer + flow;
+  stateMemoMap.set(key, answer);
+  return answer;
 }
 
 
-console.log(findMostFlow('AA', [], 30));
+console.log(findMostFlow('AA', [], 30, 0));
